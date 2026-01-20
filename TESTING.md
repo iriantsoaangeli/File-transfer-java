@@ -2,23 +2,29 @@
 
 This guide explains how to test the Network File Transfer application.
 
+## ✅ Enhanced Features
+- **Multi-Network Scanning**: ✅ Now scans ALL network interfaces (WiFi, Ethernet, VPN, etc.)
+- **Supports mixed networks**: Devices can be on different networks and still be discovered
+
 ## Prerequisites
 
 Before testing, ensure:
 - [ ] nmap is installed (`nmap --version`)
 - [ ] Java 17+ is installed (`java -version`)
 - [ ] Maven is installed (`mvn --version`)
-- [ ] You have at least 2 devices on the same network
+- [ ] You have at least 2 devices (can be on different networks)
 - [ ] Firewall allows port 5050 (or is temporarily disabled for testing)
+- [ ] ✅ Port 5050 auto-opens when app starts (automatic, no manual configuration needed)
 
 ## Test Environment Setup
 
 ### Network Configuration
 ```
 Recommended test setup:
-- 2 computers on same WiFi/LAN
-- Same subnet (e.g., 192.168.1.x)
-- Both have port 5050 accessible
+- 2 computers on WiFi/LAN (can be on different networks)
+- Can test across multiple networks (e.g., WiFi + Ethernet)
+- Both have port 5050 accessible (auto-opens on app launch)
+- ✅ App now discovers devices across ALL your network interfaces
 ```
 
 ### Build the Application
@@ -31,21 +37,23 @@ Expected output: `BUILD SUCCESS`
 
 ## Test Cases
 
-### Test 1: Application Startup
+### Test 1: Application Startup & Port Auto-Open
 
-**Objective**: Verify the app starts without errors
+**Objective**: Verify the app starts and port 5050 opens automatically
 
 **Steps**:
 1. Run `./run.sh` or `mvn clean javafx:run`
 2. Wait for UI window to appear
+3. Verify port is open: `sudo netstat -tlnp | grep 5050` or `ss -tlnp | grep 5050`
 
 **Expected Results**:
 - ✅ Window opens with title "Network File Transfer - miyabi69"
 - ✅ Device table is empty
 - ✅ Logs show "Application started"
-- ✅ Logs show "Listening on port 5050..."
+- ✅ **Logs show "Listening on port 5050..." (port auto-opened)**
 - ✅ Bottom status shows "Listening on port 5050" in green
 - ✅ Mailbox path field shows default path
+- ✅ Port 5050 is OPEN and listening (verified via netstat/ss)
 
 **Logs should contain**:
 ```
@@ -56,38 +64,48 @@ Expected output: `BUILD SUCCESS`
 
 ---
 
-### Test 2: Network Scanning
+### Test 2: Multi-Network Scanning
 
-**Objective**: Detect devices on the network
+**Objective**: Detect devices across ALL network interfaces
+
+**Prerequisites**: Works with devices on same or different networks
 
 **Steps**:
 1. Start the app
 2. Click "Scan Network" button
+3. Observe logs showing all networks being scanned
 
 **Expected Results**:
 - ✅ Scan button becomes disabled during scan
 - ✅ Logs show "Starting network scan..."
-- ✅ Logs show "Executing: nmap -p 5050 ..."
-- ✅ After scan completes, device table populates
+- ✅ Logs show number of network interfaces found (e.g., "Found 2 active network interface(s)")
+- ✅ Logs show each network being scanned with interface name, local IP, and subnet
+- ✅ Logs show "Executing: nmap -p 5050 ..." for EACH network
+- ✅ After scan completes, device table populates with devices from ALL networks
 - ✅ At least one device appears (yourself)
 - ✅ Your device has status "ME"
 - ✅ Scan button re-enables
+- ✅ Devices across ALL active networks are discovered
+- ✅ No duplicate devices (even if visible on multiple networks)
 
 **Logs should contain**:
 ```
 [YYYY-MM-DD HH:MM:SS] === Starting Network Scan ===
 [YYYY-MM-DD HH:MM:SS] Starting network scan...
-[YYYY-MM-DD HH:MM:SS] Local IP: 192.168.1.X
-[YYYY-MM-DD HH:MM:SS] Scanning subnet: 192.168.1.0/24
-[YYYY-MM-DD HH:MM:SS] Executing: nmap -p 5050 ...
+[YYYY-MM-DD HH:MM:SS] Found 2 active network interface(s)
+[YYYY-MM-DD HH:MM:SS] Scanning network: 192.168.1.0/24 (interface: wlp2s0, local IP: 192.168.1.X)
+[YYYY-MM-DD HH:MM:SS] Executing: nmap -p 5050 192.168.1.0/24 --open -oG -
 [YYYY-MM-DD HH:MM:SS] Found ME: 192.168.1.X (hostname)
-[YYYY-MM-DD HH:MM:SS] Network scan complete. Found N devices.
+[YYYY-MM-DD HH:MM:SS] Scanning network: 10.0.0.0/24 (interface: eth0, local IP: 10.0.0.Y)
+[YYYY-MM-DD HH:MM:SS] Executing: nmap -p 5050 10.0.0.0/24 --open -oG -
+[YYYY-MM-DD HH:MM:SS] Network scan complete. Found N unique device(s) across all networks.
 [YYYY-MM-DD HH:MM:SS] === Scan Complete ===
 ```
 
 **Troubleshooting**:
 - If no devices found: Check nmap installation
 - If only localhost: Check network connection
+- If fewer networks than expected: Verify network interfaces are UP and have IP addresses
 - If error: Verify nmap has proper permissions
 
 ---

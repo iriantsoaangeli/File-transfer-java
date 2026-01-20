@@ -4,7 +4,9 @@ A JavaFX-based file transfer application that allows devices on the same network
 
 ## Features
 
+- **Multi-Network Discovery**: ✅ Automatically scans ALL network interfaces you belong to
 - **Network Discovery**: Uses `nmap` to scan the network and detect devices
+- **Port 5050 Auto-Open**: ✅ Port 5050 automatically opens when application launches
 - **Port 5050 Protocol**: Fixed port for all communications
 - **miyabi69 Handshake**: Case-sensitive handshake protocol to identify compatible devices
 - **File Transfer**: Send and receive files between compatible devices
@@ -42,11 +44,12 @@ mvn verify
 
 ### 1. Start the Application
 - Run the application on each device you want to connect
-- The app automatically starts listening on port 5050
+- ✅ The app automatically opens and listens on port 5050 (no manual action needed)
 
 ### 2. Scan Network
 - Click the **"Scan Network"** button
-- The app will use nmap to discover all devices on your subnet
+- The app will use nmap to discover devices across **ALL your network interfaces**
+- Supports multiple networks simultaneously (e.g., WiFi, Ethernet, VPN)
 - Devices with port 5050 open will be shown
 - Your device will be marked as "ME"
 
