@@ -53,3 +53,4 @@ echo ""
 
 # Run the application
 mvn clean javafx:run
+ 

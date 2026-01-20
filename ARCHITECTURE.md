@@ -1,5 +1,21 @@
 # Network File Transfer - Application Architecture
 
+## 🔮 Planned Future Enhancements
+
+### File Transfer Evolution
+- **Receiver Acceptance**: Add UI dialog for recipients to accept/reject incoming files
+- **Folder Transfer**: Support sending entire directory structures
+- **Storage Reorganization**: 
+  - "files" folder for received files
+  - "mailbox" folder repurposed for chat messages
+
+### Device & Communication
+- **Custom Device Names**: Allow users to set personalized device names
+- **Device Name Exchange**: Include device names in handshake protocol
+- **Messaging System**: Implement real-time chat functionality between compatible devices
+
+---
+
 ## ✅ All Features Implemented
 
 ### Multi-Network Scanning
@@ -284,3 +300,4 @@ Project Root/
 │  • Logs TextArea                    │
 └─────────────────────────────────────┘
 ```
+ 

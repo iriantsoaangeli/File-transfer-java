@@ -14,6 +14,19 @@ A JavaFX-based file transfer application that allows devices on the same network
 - **Live Dashboard**: Real-time view of network devices and their status
 - **Comprehensive Logging**: UI logs and file logs for all operations
 
+## 🔮 Planned Features (Coming Soon)
+
+### File Transfer Enhancements
+- **Receiver Acceptance**: Accept/reject incoming files before saving
+- **Folder Transfer**: Send entire folders, not just individual files
+- **Files Folder**: Separate "files" folder for received files
+
+### Device & Messaging
+- **Custom Device Names**: Choose your own device name
+- **Device Name Display**: Show device names after handshake (instead of "Unknown")
+- **Messaging System**: Real-time chat between compatible devices
+- **Mailbox for Chats**: Dedicated mailbox for storing chat messages
+
 ## Requirements
 
 - **Java**: Minimum version 17
@@ -153,3 +166,4 @@ logs/                               # Application logs
 ## License
 
 This project is provided as-is for educational and internal use.
+ 

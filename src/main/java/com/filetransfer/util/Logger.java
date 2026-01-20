@@ -73,3 +73,4 @@ public class Logger {
         void onLogMessage(String message);
     }
 }
+ 

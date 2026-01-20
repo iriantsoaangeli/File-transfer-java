@@ -4,6 +4,22 @@
 
 A fully functional JavaFX-based file transfer application using the "miyabi69" protocol.
 
+## 🔮 Planned Future Enhancements
+
+### File Transfer Improvements
+- **Receiver Acceptance Dialog**: Allow recipients to accept/reject incoming files
+- **Folder Transfer Support**: Send entire folders instead of just single files
+- **Files vs Mailbox Separation**: 
+  - Change "mailbox" to "files" folder for received files
+  - Repurpose "mailbox" for chat message storage
+
+### Device & Communication Features
+- **Custom Device Names**: Let users set custom device names instead of hostnames
+- **Device Name in Handshake**: Display custom device names after handshake (replace "Unknown")
+- **Messaging System**: Add real-time chat/messaging between compatible devices
+
+---
+
 ### ✅ Working Features
 - **Multi-Network Scanning**: ✅ Scans ALL network interfaces simultaneously (WiFi, Ethernet, VPN, etc.)
 - **Port 5050 Auto-Open**: ✅ Port 5050 automatically opens on application launch via PortListener service.
@@ -248,3 +264,4 @@ Edit `src/main/resources/application.properties` for:
 **Documentation**: Complete  
 
 Run `./run.sh` to start the application!
+ 

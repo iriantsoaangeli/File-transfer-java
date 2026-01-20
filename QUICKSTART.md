@@ -194,3 +194,17 @@ netstat -tulpn | grep 5050
 ## Security Reminder
 
 ⚠️ **No Security**: This app has no encryption or authentication. Use only on trusted networks!
+
+---
+
+## 🔮 Coming Soon
+
+The following features are planned for future releases:
+
+- **Receiver Acceptance**: Accept or reject incoming files before saving
+- **Folder Transfer**: Send entire folders, not just individual files
+- **Custom Device Names**: Set your own device name instead of using hostname
+- **Device Names in UI**: See custom device names after handshake
+- **Messaging System**: Chat with compatible devices in real-time
+- **Files vs Mailbox**: Separate folders for files and chat messages
+ 

@@ -1,5 +1,23 @@
 # Network File Transfer Application - TODO List
 
+## 🔮 FUTURE UPDATES - PLANNED FEATURES
+
+### File Transfer Enhancements
+- [ ] **Receiver Acceptance**: Implement accept/reject dialog for incoming files
+- [ ] **Folder Transfer**: Support sending entire folders (not just single files)
+- [ ] **Files Folder**: Change received files location from "mailbox" to "files" folder
+
+### Device Management
+- [ ] **Custom Device Names**: Allow users to choose their own device name
+- [ ] **Device Name Display**: Show custom device names after handshake (instead of "Unknown")
+
+### Messaging System
+- [ ] **Add Messaging**: Implement real-time chat/messaging between compatible devices
+- [ ] **Mailbox for Chats**: Repurpose "mailbox" folder for storing chat messages
+- [ ] **Message Notifications**: Show notifications for new messages
+
+---
+
 ## ✅ COMPLETED - ALL TASKS DONE!
 
 ## 1. Project Setup and Structure ✅
@@ -120,3 +138,4 @@
 - **Security**: None
 - **UI**: Single window with dashboard and logs
 - **Execution**: Run via Maven (`mvn javafx:run`)
+ 
