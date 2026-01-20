@@ -34,7 +34,7 @@ public class FileTransferService {
     private void ensureMailboxExists() {
         try {
             Path path = Paths.get(mailboxPath);
-            if (!Files.exists(path)) {
+            if (!Files.exists(path)) { 
                 Files.createDirectories(path);
                 logger.log("Created mailbox directory: " + mailboxPath);
             }
