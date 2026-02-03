@@ -46,6 +46,19 @@ public class PortListener implements Runnable {
         listeners.add(listener);
     }
     
+    /**
+     * Check if a port is available for binding
+     */
+    private boolean isPortAvailable(int port) {
+        try {
+            ServerSocket testSocket = new ServerSocket(port);
+            testSocket.close();
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+    
     public void start() {
         if (running) {
             logger.log("Port listener already running");
@@ -59,6 +72,13 @@ public class PortListener implements Runnable {
     
     @Override
     public void run() {
+        // Check if port 8080 is available before starting
+        if (!isPortAvailable(PORT)) {
+            logger.log("ERROR: Port " + PORT + " is already in use by another application");
+            logger.log("Please close the other application or choose a different port");
+            return;
+        }
+        
         try {
             serverSocket = new ServerSocket(PORT);
             running = true;

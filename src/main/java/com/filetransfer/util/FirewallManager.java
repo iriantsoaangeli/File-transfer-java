@@ -103,33 +103,9 @@ public class FirewallManager {
     }
     
     public void closePort() {
-        if (!portOpened || firewallType == null) {
-            return;
-        }
-        
-        try {
-            logger.log("Closing port " + PORT + " in firewall...");
-            
-            switch (firewallType) {
-                case "windows":
-                    closePortWindows();
-                    break;
-                case "ufw":
-                    closePortUFW();
-                    break;
-                case "firewalld":
-                    closePortFirewalld();
-                    break;
-                case "iptables":
-                    closePortIptables();
-                    break;
-            }
-            
-            portOpened = false;
-            logger.log("Port " + PORT + " closed successfully");
-        } catch (Exception e) {
-            logger.log("ERROR closing port: " + e.getMessage());
-        }
+        // Port 8080 is a public port - no firewall cleanup needed
+        logger.log("Port " + PORT + " is a public port - no firewall cleanup required");
+        portOpened = false;
     }
     
     private void closePortWindows() throws Exception {
