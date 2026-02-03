@@ -72,39 +72,9 @@ public class FirewallManager {
     }
     
     public void openPort() {
-        if (firewallType == null) {
-            logger.log("No firewall to configure");
-            return;
-        }
-        
-        try {
-            logger.log("Opening port " + PORT + " in firewall...");
-            
-            switch (firewallType) {
-                case "windows":
-                    openPortWindows();
-                    break;
-                case "ufw":
-                    openPortUFW();
-                    break;
-                case "firewalld":
-                    openPortFirewalld();
-                    break;
-                case "iptables":
-                    openPortIptables();
-                    break;
-            }
-            
-            portOpened = true;
-            logger.log("Port " + PORT + " opened successfully");
-        } catch (Exception e) {
-            logger.log("ERROR opening port: " + e.getMessage());
-            if (OS.contains("win")) {
-                logger.log("You may need to run as Administrator or manually allow port " + PORT);
-            } else {
-                logger.log("You may need to run: sudo ufw allow " + PORT + "/tcp");
-            }
-        }
+        // Port 8080 is a public port - no firewall configuration needed
+        logger.log("Port " + PORT + " is a public port - no firewall configuration required");
+        portOpened = true;
     }
     
     private void openPortWindows() throws Exception {
