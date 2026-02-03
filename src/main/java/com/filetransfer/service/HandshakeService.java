@@ -1,19 +1,22 @@
 package com.filetransfer.service;
 
 import com.filetransfer.util.Logger;
+import com.filetransfer.util.SessionManager;
 
 import java.io.*;
 import java.net.Socket;
 
 public class HandshakeService {
     
-    private static final int PORT = 5050;
+    private static final int PORT = 8080;
     private static final String HANDSHAKE = "miyabi69";
     
     private Logger logger;
+    private SessionManager sessionManager;
     
-    public HandshakeService(Logger logger) {
+    public HandshakeService(Logger logger, SessionManager sessionManager) {
         this.logger = logger;
+        this.sessionManager = sessionManager;
     }
     
     public boolean sendHandshake(String targetIP) {
@@ -35,6 +38,8 @@ public class HandshakeService {
             
             if (HANDSHAKE.equals(response)) {
                 logger.log("Handshake successful with " + targetIP);
+                // Add to session manager
+                sessionManager.addCompatibleDevice(targetIP);
                 return true;
             } else {
                 logger.log("Invalid handshake response from " + targetIP);

@@ -13,13 +13,13 @@ public class App extends Application {
     
     @Override
     public void start(Stage primaryStage) throws Exception {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/filetransfer/main.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/filetransfer/main_with_queue.fxml"));
         Parent root = loader.load();
         controller = loader.getController();
         
         Scene scene = new Scene(root);
         
-        primaryStage.setTitle("Network File Transfer - miyabi69");
+        primaryStage.setTitle("Network File Transfer");
         primaryStage.setScene(scene);
         primaryStage.setOnCloseRequest(event -> {
             if (controller != null) {

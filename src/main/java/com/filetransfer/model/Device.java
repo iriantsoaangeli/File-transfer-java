@@ -3,14 +3,14 @@ package com.filetransfer.model;
 public class Device {
     private String ipAddress;
     private String hostname;
-    private boolean port5050Open;
+    private boolean port8080Open;
     private boolean isMe;
     private boolean isCompatible;
 
-    public Device(String ipAddress, String hostname, boolean port5050Open) {
+    public Device(String ipAddress, String hostname, boolean port8080Open) {
         this.ipAddress = ipAddress;
         this.hostname = hostname;
-        this.port5050Open = port5050Open;
+        this.port8080Open = port8080Open;
         this.isMe = false;
         this.isCompatible = false;
     }
@@ -31,12 +31,12 @@ public class Device {
         this.hostname = hostname;
     }
 
-    public boolean isPort5050Open() {
-        return port5050Open;
+    public boolean isPort8080Open() {
+        return port8080Open;
     }
 
-    public void setPort5050Open(boolean port5050Open) {
-        this.port5050Open = port5050Open;
+    public void setPort8080Open(boolean port8080Open) {
+        this.port8080Open = port8080Open;
     }
 
     public boolean isMe() {
@@ -60,7 +60,7 @@ public class Device {
             return "ME";
         } else if (isCompatible) {
             return "Compatible";
-        } else if (port5050Open) {
+        } else if (port8080Open) {
             return "Port Open";
         } else {
             return "Not Available";

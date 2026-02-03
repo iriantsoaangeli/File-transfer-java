@@ -13,11 +13,48 @@ import java.util.regex.Pattern;
 
 public class NetworkScanner {
     
-    private static final int TARGET_PORT = 5050;
+    private static final int TARGET_PORT = 8080;
+    private static final String OS = System.getProperty("os.name").toLowerCase();
     private Logger logger;
+    private String nmapPath;
 
     public NetworkScanner(Logger logger) {
         this.logger = logger;
+        this.nmapPath = findNmapPath();
+    }
+    
+    /**
+     * Find nmap executable path (handles Windows and Unix)
+     */
+    private String findNmapPath() {
+        if (OS.contains("win")) {
+            // Common Windows installation paths
+            String[] possiblePaths = {
+                "C:\\Program Files (x86)\\Nmap\\nmap.exe",
+                "C:\\Program Files\\Nmap\\nmap.exe",
+                "nmap.exe", // If in PATH
+                "nmap"      // Fallback
+            };
+            
+            for (String path : possiblePaths) {
+                try {
+                    ProcessBuilder pb = new ProcessBuilder(path, "--version");
+                    Process process = pb.start();
+                    if (process.waitFor() == 0) {
+                        logger.log("Found nmap at: " + path);
+                        return path;
+                    }
+                } catch (Exception e) {
+                    // Try next path
+                }
+            }
+            
+            logger.log("WARNING: nmap not found in standard Windows locations");
+            return "nmap"; // Fallback, will fail if not in PATH
+        } else {
+            // Unix/Linux/Mac - assume in PATH
+            return "nmap";
+        }
     }
 
     public List<Device> scanNetwork() {
@@ -54,8 +91,8 @@ public class NetworkScanner {
     private void scanSubnet(String subnet, String localIP, Map<String, Device> deviceMap) {
         try {
             // Build nmap command to scan entire network
-            String[] nmapCommand = {"nmap", "-p", String.valueOf(TARGET_PORT), subnet, "--open", "-oG", "-"};
-            logger.log("Executing: nmap -p " + TARGET_PORT + " " + subnet + " --open -oG -");
+            String[] nmapCommand = {nmapPath, "-p", String.valueOf(TARGET_PORT), subnet, "--open", "-oG", "-"};
+            logger.log("Executing: " + nmapPath + " -p " + TARGET_PORT + " " + subnet + " --open -oG -");
             
             ProcessBuilder pb = new ProcessBuilder(nmapCommand);
             Process process = pb.start();
@@ -74,7 +111,7 @@ public class NetworkScanner {
                             hostname = "Unknown";
                         }
                         
-                        // Since we use --open flag, ALL devices returned by nmap have port 5050 open
+                        // Since we use --open flag, ALL devices returned by nmap have port 8080 open
                         boolean portOpen = true;
                         
                         // Only add if not already in map (avoid duplicates from multiple networks)
@@ -88,7 +125,7 @@ public class NetworkScanner {
                             }
                             
                             deviceMap.put(ip, device);
-                            logger.log("Found device: " + ip + " (" + hostname + ") - Port 5050: OPEN");
+                            logger.log("Found device: " + ip + " (" + hostname + ") - Port 8080: OPEN");
                         }
                     }
                 }

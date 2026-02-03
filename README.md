@@ -1,66 +1,129 @@
-# Network File Transfer Application
+# File Transfer App# Network File Transfer Application
 
-A JavaFX-based file transfer application that allows devices on the same network to discover each other and exchange files using the "miyabi69" protocol.
 
-## Features
 
-- **Multi-Network Discovery**: ✅ Automatically scans ALL network interfaces you belong to
-- **Network Discovery**: Uses `nmap` to scan the network and detect devices
-- **Port 5050 Auto-Open**: ✅ Port 5050 automatically opens when application launches
-- **Port 5050 Protocol**: Fixed port for all communications
+JavaFX peer-to-peer file transfer with queue system.A JavaFX-based file transfer application that allows devices on the same network to discover each other and exchange files using the "miyabi69" protocol.
+
+
+
+## Quick Start## Features
+
+
+
+```bash- **Multi-Network Discovery**: ✅ Automatically scans ALL network interfaces you belong to
+
+./run.sh          # Linux/Mac- **Network Discovery**: Uses `nmap` to scan the network and detect devices
+
+run.bat           # Windows- **Port 5050 Auto-Open**: ✅ Port 5050 automatically opens when application launches
+
+```- **Port 5050 Protocol**: Fixed port for all communications
+
 - **miyabi69 Handshake**: Case-sensitive handshake protocol to identify compatible devices
-- **File Transfer**: Send and receive files between compatible devices
+
+## Requirements- **File Transfer**: Send and receive files between compatible devices
+
 - **Mailbox System**: Configurable folder where received files are stored
-- **Live Dashboard**: Real-time view of network devices and their status
-- **Comprehensive Logging**: UI logs and file logs for all operations
+
+- Java 17+- **Live Dashboard**: Real-time view of network devices and their status
+
+- Maven 3.6+- **Comprehensive Logging**: UI logs and file logs for all operations
+
+- Port 8080 open
 
 ## 🔮 Planned Features (Coming Soon)
 
+## How to Use
+
 ### File Transfer Enhancements
-- **Receiver Acceptance**: Accept/reject incoming files before saving
-- **Folder Transfer**: Send entire folders, not just individual files
-- **Files Folder**: Separate "files" folder for received files
 
-### Device & Messaging
+1. **Scan Network** - Find devices running the app- **Receiver Acceptance**: Accept/reject incoming files before saving
+
+2. **Handshake** - Click a device to connect- **Folder Transfer**: Send entire folders, not just individual files
+
+3. **Send Files** - Select device, click "Send File"- **Files Folder**: Separate "files" folder for received files
+
+4. **Approve** - Receiver approves incoming files
+
+5. **Transfer** - Up to 3 files transfer at once### Device & Messaging
+
 - **Custom Device Names**: Choose your own device name
-- **Device Name Display**: Show device names after handshake (instead of "Unknown")
-- **Messaging System**: Real-time chat between compatible devices
-- **Mailbox for Chats**: Dedicated mailbox for storing chat messages
 
-## Requirements
+## Protocol- **Device Name Display**: Show device names after handshake (instead of "Unknown")
+
+- **Messaging System**: Real-time chat between compatible devices
+
+**Send Request:**- **Mailbox for Chats**: Dedicated mailbox for storing chat messages
+
+```
+
+TRANSFER_REQUEST:id:filename:size## Requirements
+
+```
 
 - **Java**: Minimum version 17
-- **Maven**: For building and running the application
-- **nmap**: Must be installed and available in system PATH
-  - Ubuntu/Debian: `sudo apt-get install nmap`
-  - Fedora/RHEL: `sudo dnf install nmap`
-  - macOS: `brew install nmap`
 
-## Installation
+**Response:**- **Maven**: For building and running the application
 
-1. Clone or extract the project
-2. Navigate to the project directory
+```- **nmap**: Must be installed and available in system PATH
+
+OK:id    # Approved  - Ubuntu/Debian: `sudo apt-get install nmap`
+
+KO:id    # Rejected  - Fedora/RHEL: `sudo dnf install nmap`
+
+```  - macOS: `brew install nmap`
+
+
+
+## Queue Files## Installation
+
+
+
+- `send.queue.dat` - Outgoing transfers1. Clone or extract the project
+
+- `receive.queue.dat` - Incoming transfers2. Navigate to the project directory
+
 3. Ensure `nmap` is installed: `nmap --version`
+
+Format: `id|filename|size|ip|status`
 
 ## Running the Application
 
+## Firewall
+
 ```bash
-mvn clean javafx:run
-```
 
-Or use the Maven verify/test tasks:
+**Linux:**mvn clean javafx:run
+
+```bash```
+
+sudo ufw allow 8080/tcp
+
+```Or use the Maven verify/test tasks:
+
 ```bash
-mvn verify
-```
 
-## How to Use
+**Windows:**mvn verify
 
-### 1. Start the Application
+```powershell```
+
+netsh advfirewall firewall add rule name="File Transfer" dir=in action=allow protocol=TCP localport=8080
+
+```## How to Use
+
+
+
+## Build### 1. Start the Application
+
 - Run the application on each device you want to connect
-- ✅ The app automatically opens and listens on port 5050 (no manual action needed)
 
-### 2. Scan Network
-- Click the **"Scan Network"** button
+```bash- ✅ The app automatically opens and listens on port 5050 (no manual action needed)
+
+mvn clean compile
+
+mvn javafx:run### 2. Scan Network
+
+```- Click the **"Scan Network"** button
+
 - The app will use nmap to discover devices across **ALL your network interfaces**
 - Supports multiple networks simultaneously (e.g., WiFi, Ethernet, VPN)
 - Devices with port 5050 open will be shown
@@ -149,7 +212,7 @@ logs/                               # Application logs
 ### Devices Not Appearing
 - Ensure devices are on the same subnet
 - Check firewall settings (port 5050 must be open)
-- Try running nmap manually: `nmap -p 5050 192.168.1.0/24 --open`
+- Try running nmap manually: `nmap -p 8080 192.168.1.0/24 --open`
 
 ### No Permission to Run nmap
 - nmap may require sudo/admin privileges for certain scan types
