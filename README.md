@@ -1,52 +1,67 @@
-# File Transfer App# Network File Transfer Application
+# File Transfer App
 
+JavaFX peer-to-peer file transfer with queue system.
 
+## Quick Start
 
-JavaFX peer-to-peer file transfer with queue system.A JavaFX-based file transfer application that allows devices on the same network to discover each other and exchange files using the "miyabi69" protocol.
+```bash
+./run.sh          # Linux/Mac
+run.bat           # Windows
+```
 
+## Requirements
 
-
-## Quick Start## Features
-
-
-
-```bash- **Multi-Network Discovery**: ✅ Automatically scans ALL network interfaces you belong to
-
-./run.sh          # Linux/Mac- **Network Discovery**: Uses `nmap` to scan the network and detect devices
-
-run.bat           # Windows- **Port 5050 Auto-Open**: ✅ Port 5050 automatically opens when application launches
-
-```- **Port 5050 Protocol**: Fixed port for all communications
-
-- **miyabi69 Handshake**: Case-sensitive handshake protocol to identify compatible devices
-
-## Requirements- **File Transfer**: Send and receive files between compatible devices
-
-- **Mailbox System**: Configurable folder where received files are stored
-
-- Java 17+- **Live Dashboard**: Real-time view of network devices and their status
-
-- Maven 3.6+- **Comprehensive Logging**: UI logs and file logs for all operations
-
-- Port 8080 open
-
-## 🔮 Planned Features (Coming Soon)
+- Java 17+
+- Maven 3.6+
+- Port 8080 open (public port, no admin needed)
+- nmap for network scanning
 
 ## How to Use
 
-### File Transfer Enhancements
-
-1. **Scan Network** - Find devices running the app- **Receiver Acceptance**: Accept/reject incoming files before saving
-
-2. **Handshake** - Click a device to connect- **Folder Transfer**: Send entire folders, not just individual files
-
-3. **Send Files** - Select device, click "Send File"- **Files Folder**: Separate "files" folder for received files
-
+1. **Scan Network** - Find devices running the app
+2. **Handshake** - Click a device to connect
+3. **Send Files** - Select device, click "Send File"
 4. **Approve** - Receiver approves incoming files
+5. **Transfer** - Up to 3 files transfer at once
 
-5. **Transfer** - Up to 3 files transfer at once### Device & Messaging
+## Protocol
 
-- **Custom Device Names**: Choose your own device name
+**Send Request:**
+```
+TRANSFER_REQUEST:id:filename:size
+```
+
+**Response:**
+```
+OK:id    # Approved
+KO:id    # Rejected
+```
+
+## Queue Files
+
+- `send.queue.dat` - Outgoing transfers
+- `receive.queue.dat` - Incoming transfers
+
+Format: `id|filename|size|ip|status`
+
+## Firewall
+
+**Linux:**
+```bash
+sudo ufw allow 8080/tcp
+```
+
+**Windows:**
+```powershell
+netsh advfirewall firewall add rule name="File Transfer" dir=in action=allow protocol=TCP localport=8080
+```
+
+## Build
+
+```bash
+mvn clean compile
+mvn javafx:run
+```
 
 ## Protocol- **Device Name Display**: Show device names after handshake (instead of "Unknown")
 
