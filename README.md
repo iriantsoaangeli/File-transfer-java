@@ -1,247 +1,326 @@
-# File Transfer App
+# FTPApp v1.0 — Serveur & Client FTP en Java
 
-JavaFX peer-to-peer file transfer with queue system.
+> Projet pédagogique — Comprendre le protocole FTP et les sockets Java
 
-## Quick Start
+---
+
+## 🔹 Description du Projet
+
+**FTPApp** est une application Java Desktop qui implémente simultanément un **serveur FTP** et un **client FTP**, entièrement à base de sockets Java standard (`java.net`). L'interface graphique est réalisée avec **JavaFX 17** (FXML + Controllers MVC).
+
+**But pédagogique :** Comprendre en profondeur le protocole FTP, le fonctionnement des sockets TCP, la gestion multi-thread et le mode passif (PASV).
+
+---
+
+## 🔹 Fonctionnalités V1
+
+### Serveur FTP
+- ✅ Sélection de l'interface réseau et du port d'écoute
+- ✅ Choix du dossier racine partagé
+- ✅ Gestion multi-utilisateurs (fichier `users.txt`)
+- ✅ Démarrage / arrêt du serveur via l'interface graphique
+- ✅ Console de logs en temps réel
+- ✅ Support multi-clients simultanés (threads)
+- ✅ Mode PASSIF (PASV) uniquement
+- ✅ Compatible FileZilla
+
+### Client FTP
+- ✅ Connexion à tout serveur FTP du réseau local
+- ✅ Authentification login / mot de passe
+- ✅ Navigation dans l'arborescence (double-clic sur dossier)
+- ✅ Listage des fichiers en tableau
+- ✅ Upload de fichiers vers le serveur
+- ✅ Download de fichiers depuis le serveur
+- ✅ Suppression de fichiers (si autorisé par le serveur)
+- ✅ Opérations non-bloquantes (threads dédiés)
+
+### Protocole FTP implémenté
+Commandes supportées :
+`USER`, `PASS`, `SYST`, `FEAT`, `PWD`, `CWD`, `CDUP`, `PASV`, `LIST`, `RETR`, `STOR`, `TYPE`, `SIZE`, `QUIT`, `NOOP`, `ABOR`, `STAT`
+
+---
+
+## 🔹 Structure du Projet
+
+```
+src/main/java/
+├── app/
+│   └── MainApp.java              ← Point d'entrée JavaFX (Application.start)
+│
+├── ftp/
+│   ├── server/
+│   │   ├── FTPServer.java        ← Gestion ServerSocket, threads, utilisateurs
+│   │   ├── ClientHandler.java    ← Thread par client, canal de contrôle + données
+│   │   └── FTPCommandProcessor.java ← Logique FTP : parse et répond aux commandes
+│   │
+│   ├── client/
+│   │   └── FTPClientService.java ← Client FTP : connexion, AUTH, LIST, RETR, STOR
+│   │
+│   └── model/
+│       ├── User.java             ← Modèle utilisateur (login, password, sérialisation)
+│       └── FTPResponse.java      ← Codes et formatage des réponses FTP
+│
+├── ui/
+│   └── controller/
+│       ├── ServerController.java ← Controller FXML côté serveur (MVC)
+│       └── ClientController.java ← Controller FXML côté client (MVC)
+│
+└── util/
+    ├── NetworkUtils.java         ← Listage interfaces réseau, formatage PASV
+    └── FileUtils.java            ← Gestion users.txt, formatage LIST, résolution chemins
+
+src/main/resources/
+└── ui/view/
+    ├── server.fxml               ← Interface graphique du serveur
+    ├── client.fxml               ← Interface graphique du client
+    └── style.css                 ← Feuille de style (thème Catppuccin Mocha)
+```
+
+### Rôle de chaque couche
+
+| Couche | Package | Rôle |
+|--------|---------|------|
+| **Réseau/Serveur** | `ftp.server` | ServerSocket, accept, threads clients, PASV |
+| **Logique FTP** | `ftp.server.FTPCommandProcessor` | Parse commandes, produit réponses RFC |
+| **Client FTP** | `ftp.client` | Socket client, négociation PASV, transferts |
+| **Modèles** | `ftp.model` | Objets métier purs (User, FTPResponse) |
+| **UI** | `ui.controller` | Controllers JavaFX, aucune logique réseau |
+| **Utilitaires** | `util` | Réseau, fichiers, sécurité chemins |
+
+---
+
+## 🔹 Logique FTP Expliquée
+
+### Canal de Contrôle vs Canal de Données
+
+Le protocole FTP utilise **deux connexions TCP distinctes** :
+
+```
+Client                          Serveur
+  |                                |
+  |--- connexion port 21/2121 ---->|  (canal de contrôle)
+  |<-- 220 Service ready ----------|
+  |                                |
+  |--- USER alice ---------------->|
+  |<-- 331 Password required ------|
+  |--- PASS secret --------------->|
+  |<-- 230 User logged in ---------|
+  |                                |
+  |--- PASV ---------------------->|  (négociation données)
+  |<-- 227 Entering Passive Mode --|  (serveur ouvre port X)
+  |                                |
+  |--- connexion port X ---------->|  (canal de données)
+  |                                |
+  |--- LIST ---------------------->|
+  |<-- 150 Opening data connection-|
+  |  [données sur canal de données]|
+  |<-- 226 Transfer complete ------|
+```
+
+### Mode PASSIF (PASV)
+
+Dans le mode passif :
+1. Le client envoie `PASV`
+2. Le serveur ouvre un socket sur un port aléatoire
+3. Le serveur répond : `227 Entering Passive Mode (h1,h2,h3,h4,p1,p2)`
+   - h1-h4 : octets de l'adresse IP
+   - p1,p2 : octets du port (port = p1×256 + p2)
+4. Le client se connecte à `ip:port` pour le transfert
+
+**Exemple :** `227 Entering Passive Mode (192,168,1,10,7,208)`
+→ Port = 7×256 + 208 = **2000**
+
+### Codes de Réponse FTP
+
+| Code | Signification |
+|------|---------------|
+| 220 | Service prêt |
+| 230 | Utilisateur connecté |
+| 331 | Mot de passe requis |
+| 530 | Non authentifié |
+| 257 | Répertoire courant (PWD) |
+| 250 | Action réussie (CWD, DELE) |
+| 150 | Ouverture connexion de données |
+| 226 | Transfert terminé |
+| 227 | Mode passif accepté |
+| 221 | Fermeture (QUIT) |
+| 550 | Fichier/action non disponible |
+| 500 | Commande inconnue |
+
+### Dialogue FTP Complet (Exemple)
+
+```
+Client: (connexion TCP sur port 2121)
+Serveur: 220 FTPApp Service ready - Bienvenue
+
+Client: USER admin
+Serveur: 331 Mot de passe requis pour admin
+
+Client: PASS admin
+Serveur: 230 Connecté en tant que admin
+
+Client: SYST
+Serveur: 215 UNIX Type: L8
+
+Client: PWD
+Serveur: 257 "/" est le répertoire courant.
+
+Client: TYPE I
+Serveur: 200 Mode binaire activé.
+
+Client: PASV
+Serveur: 227 Entering Passive Mode (192,168,1,10,7,208).
+
+Client: (connexion TCP vers 192.168.1.10:2000)
+Client: LIST
+Serveur: 150 Ouverture connexion données pour LIST.
+[données: liste de fichiers sur canal de données]
+Serveur: 226 Listing envoyé.
+
+Client: PASV
+Serveur: 227 Entering Passive Mode (192,168,1,10,7,209).
+Client: (connexion TCP vers 192.168.1.10:2001)
+Client: RETR document.pdf
+Serveur: 150 Ouverture connexion données pour RETR document.pdf
+[données: contenu binaire du fichier]
+Serveur: 226 Transfert terminé : document.pdf
+
+Client: QUIT
+Serveur: 221 Au revoir.
+```
+
+---
+
+## 🔹 Comment Compiler
+
+### Prérequis
+
+- **Java 17** (JDK)
+- **Maven 3.8+**
+- Connexion Internet (pour télécharger JavaFX depuis Maven Central)
+
+### Compilation
 
 ```bash
-./run.sh          # Linux/Mac
-run.bat           # Windows
+# Depuis le dossier racine du projet
+cd "Version 1"
+
+# Compilation simple
+mvn compile
+
+# Compilation + tests
+mvn test
+
+# Package complet (JAR exécutable)
+mvn package
 ```
 
-## Requirements
+Le JAR est généré dans `target/ftpapp-1.0.0.jar`.
 
-- Java 17+
-- Maven 3.6+
-- Port 8080 open (public port, no admin needed)
-- nmap for network scanning
+---
 
-## How to Use
+## 🔹 Comment Lancer
 
-1. **Scan Network** - Find devices running the app
-2. **Handshake** - Click a device to connect
-3. **Send Files** - Select device, click "Send File"
-4. **Approve** - Receiver approves incoming files
-5. **Transfer** - Up to 3 files transfer at once
-
-## Protocol
-
-**Send Request:**
-```
-TRANSFER_REQUEST:id:filename:size
-```
-
-**Response:**
-```
-OK:id    # Approved
-KO:id    # Rejected
-```
-
-## Queue Files
-
-- `send.queue.dat` - Outgoing transfers
-- `receive.queue.dat` - Incoming transfers
-
-Format: `id|filename|size|ip|status`
-
-## Firewall
-
-**Linux:**
-```bash
-sudo ufw allow 8080/tcp
-```
-
-**Windows:**
-```powershell
-netsh advfirewall firewall add rule name="File Transfer" dir=in action=allow protocol=TCP localport=8080
-```
-
-## Build
+### Avec Maven (développement)
 
 ```bash
-mvn clean compile
 mvn javafx:run
 ```
 
-## Protocol- **Device Name Display**: Show device names after handshake (instead of "Unknown")
-
-- **Messaging System**: Real-time chat between compatible devices
-
-**Send Request:**- **Mailbox for Chats**: Dedicated mailbox for storing chat messages
-
-```
-
-TRANSFER_REQUEST:id:filename:size## Requirements
-
-```
-
-- **Java**: Minimum version 17
-
-**Response:**- **Maven**: For building and running the application
-
-```- **nmap**: Must be installed and available in system PATH
-
-OK:id    # Approved  - Ubuntu/Debian: `sudo apt-get install nmap`
-
-KO:id    # Rejected  - Fedora/RHEL: `sudo dnf install nmap`
-
-```  - macOS: `brew install nmap`
-
-
-
-## Queue Files## Installation
-
-
-
-- `send.queue.dat` - Outgoing transfers1. Clone or extract the project
-
-- `receive.queue.dat` - Incoming transfers2. Navigate to the project directory
-
-3. Ensure `nmap` is installed: `nmap --version`
-
-Format: `id|filename|size|ip|status`
-
-## Running the Application
-
-## Firewall
+### Avec le JAR compilé
 
 ```bash
+java -jar target/ftpapp-1.0.0.jar
+```
 
-**Linux:**mvn clean javafx:run
-
-```bash```
-
-sudo ufw allow 8080/tcp
-
-```Or use the Maven verify/test tasks:
-
+> ⚠️ JavaFX doit être disponible. Si vous utilisez un JDK sans JavaFX (ex: OpenJDK standard), ajoutez le module path :
 ```bash
-
-**Windows:**mvn verify
-
-```powershell```
-
-netsh advfirewall firewall add rule name="File Transfer" dir=in action=allow protocol=TCP localport=8080
-
-```## How to Use
-
-
-
-## Build### 1. Start the Application
-
-- Run the application on each device you want to connect
-
-```bash- ✅ The app automatically opens and listens on port 5050 (no manual action needed)
-
-mvn clean compile
-
-mvn javafx:run### 2. Scan Network
-
-```- Click the **"Scan Network"** button
-
-- The app will use nmap to discover devices across **ALL your network interfaces**
-- Supports multiple networks simultaneously (e.g., WiFi, Ethernet, VPN)
-- Devices with port 5050 open will be shown
-- Your device will be marked as "ME"
-
-### 3. Establish Compatibility
-- Select a device from the table
-- Click **"Handshake"** to send the "miyabi69" message
-- Compatible devices will automatically respond with "miyabi69"
-- Compatible devices will be marked in the status column
-
-**Note**: The handshake is bidirectional - if another device sends you "miyabi69", you'll automatically respond and mark them as compatible.
-
-### 4. Send Files
-- Click **"Select File"** to choose a file
-- Select a compatible device from the table
-- Click **"Send File"** to transfer
-- The file will be received in the recipient's mailbox folder
-
-### 5. Configure Mailbox
-- Default mailbox location: `./mailbox` (in project directory)
-- Change the path in the "Mailbox Configuration" field
-- Click **"Apply"** to update
-- Received files will be saved to this location
-
-## Protocol Details
-
-### Port 5050
-- Fixed port for all communications
-- Used for handshake, discovery, and file transfer
-
-### miyabi69 Handshake
-- Case-sensitive: must be exactly "miyabi69"
-- Sent when you click "Handshake" button
-- Automatically sent in response when received
-- Marks devices as compatible for file transfer
-
-### File Transfer
-- One file at a time
-- Socket-based transfer using FTP protocol
-- Connection automatically closes after transfer
-- Supports plain text and small files/folders
-- No maximum size limit
-
-### Duplicate Handling
-- If a file with the same name exists, it will be renamed
-- Format: `filename_1.ext`, `filename_2.ext`, etc.
-
-## Project Structure
-
-```
-src/main/java/com/filetransfer/
-├── App.java                        # Main application entry point
-├── controller/
-│   └── MainController.java         # UI controller
-├── model/
-│   └── Device.java                 # Device data model
-├── service/
-│   ├── NetworkScanner.java         # nmap integration
-│   ├── PortListener.java           # Port 5050 listener
-│   ├── HandshakeService.java       # miyabi69 protocol
-│   └── FileTransferService.java    # File send/receive
-└── util/
-    └── Logger.java                 # Logging system
-
-src/main/resources/
-└── com/filetransfer/
-    └── main.fxml                   # UI layout
-
-mailbox/                            # Default received files location
-logs/                               # Application logs
+java --module-path /chemin/javafx-sdk/lib --add-modules javafx.controls,javafx.fxml -jar target/ftpapp-1.0.0.jar
 ```
 
-## Troubleshooting
+### Utilisation avec FileZilla
 
-### Port 5050 Already in Use
-- Check if another instance is running
-- Use `lsof -i :5050` (Linux/Mac) or `netstat -ano | findstr 5050` (Windows)
-- Kill the process or change the port (requires code modification)
+1. Démarrez l'application et allez dans l'onglet **Serveur**
+2. Sélectionnez votre interface réseau (ex: `eth0 - 192.168.1.10`)
+3. Port : `2121` (ou `21` avec privilèges admin)
+4. Choisissez votre dossier partagé
+5. Ajoutez un utilisateur, puis cliquez **Démarrer**
+6. Dans FileZilla :
+   - Hôte : `192.168.1.10`
+   - Port : `2121`
+   - Protocol : FTP (pas SFTP)
+   - Mode de chiffrement : FTP standard (sans chiffrement)
+   - Login : votre login configuré
 
-### nmap Not Found
-- Install nmap: See Requirements section
-- Ensure it's in your system PATH
-- Test: `nmap --version`
+---
 
-### Devices Not Appearing
-- Ensure devices are on the same subnet
-- Check firewall settings (port 5050 must be open)
-- Try running nmap manually: `nmap -p 8080 192.168.1.0/24 --open`
+## 🔹 Gestion des Utilisateurs
 
-### No Permission to Run nmap
-- nmap may require sudo/admin privileges for certain scan types
-- Run the application with appropriate permissions if needed
+Les utilisateurs sont stockés dans le fichier `users.txt` (créé au premier lancement) :
 
-## Security Notice
+```
+# Fichier utilisateurs FTP - format: login:password
+admin:admin
+alice:secret123
+bob:monmotdepasse
+```
 
-⚠️ **This application has NO security features:**
-- No encryption
-- No authentication (beyond miyabi69 handshake)
-- No access control
-- Intended for trusted networks only
+- Chargé automatiquement au démarrage du serveur
+- Modifiable depuis l'interface graphique (onglet Serveur)
+- Toute modification est persistée immédiatement
 
-## License
+---
 
-This project is provided as-is for educational and internal use.
- 
+## 🔹 Limites Techniques (V1)
+
+| Limitation | Détail |
+|-----------|--------|
+| Pas de chiffrement | FTP simple, pas FTPS/SFTP |
+| Mode PASSIF uniquement | PORT (mode actif) refusé |
+| Lecture seule côté serveur | DELE/RMD/MKD/RNFR/RNTO désactivés |
+| Un seul dossier partagé | Tous les utilisateurs voient le même répertoire |
+| Pas de permissions par utilisateur | Tous les users ont les mêmes droits |
+| Pas de reprise de transfert | Pas de REST/APPE |
+| Pas de logs persistants | Logs uniquement en mémoire (session courante) |
+| IPv4 uniquement | IPv6 non supporté |
+| Pas de TLS | Connexion non chiffrée |
+
+---
+
+## 🔹 Architecture Réseau
+
+```
+┌─────────────────────────────────────────────────────┐
+│                    FTPApp                           │
+│                                                     │
+│  ┌─────────────┐          ┌─────────────────────┐  │
+│  │  Onglet     │          │  Onglet Client      │  │
+│  │  Serveur    │          │                     │  │
+│  │             │          │  FTPClientService   │  │
+│  │  FTPServer  │          │  ├── Socket control │  │
+│  │  ├── ServerSocket      │  └── Socket data    │  │
+│  │  └── [ClientHandler]   │                     │  │
+│  │      ├── Thread        │                     │  │
+│  │      ├── FTPCommandProc│                     │  │
+│  │      └── DataSocket    │                     │  │
+│  └─────────────┘          └─────────────────────┘  │
+└─────────────────────────────────────────────────────┘
+         ↕ port 2121                ↕ port 2121
+    [Clients FTP externes]     [Serveur FTP distant]
+     FileZilla, etc.
+```
+
+---
+
+## 🔹 Indicateurs de Validation
+
+- ✅ Connexion FileZilla fonctionne
+- ✅ Upload / Download sans corruption
+- ✅ Navigation dans l'arborescence
+- ✅ Plusieurs clients simultanés
+- ✅ Arrêt propre du serveur
+- ✅ Authentification multi-utilisateurs
+
+---
+
+*FTPApp v1.0 — Projet pédagogique Java / Sockets / FTP*

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="ui.controller.ServerController"
+            prefWidth="860"
+            prefHeight="680"
+            style="-fx-background-color: #1e1e2e;">
+
+    <!-- ── Titre ───────────────────────────────────────────────────────── -->
+    <top>
+        <VBox style="-fx-background-color: #181825; -fx-padding: 12 20 12 20;">
+            <HBox alignment="CENTER_LEFT" spacing="12">
+                <Label text="🖧  FTPApp — Mode Serveur"
+                       style="-fx-text-fill: #cdd6f4; -fx-font-size: 20px; -fx-font-weight: bold;"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label fx:id="statusLabel" text="● STOPPED"
+                       style="-fx-text-fill: #f38ba8; -fx-font-weight: bold; -fx-font-size: 13px;"/>
+            </HBox>
+        </VBox>
+    </top>
+
+    <!-- ── Contenu Principal ───────────────────────────────────────────── -->
+    <center>
+        <HBox spacing="12" style="-fx-padding: 12;">
+
+            <!-- ── Panneau Gauche : Configuration ─────────────────────── -->
+            <VBox spacing="10" prefWidth="320"
+                  style="-fx-background-color: #181825; -fx-padding: 16; -fx-background-radius: 8;">
+
+                <!-- Interface réseau -->
+                <Label text="Interface réseau"
+                       style="-fx-text-fill: #a6adc8; -fx-font-size: 11px; -fx-font-weight: bold;"/>
+                <ComboBox fx:id="interfaceComboBox" maxWidth="Infinity"
+                          style="-fx-background-color: #313244; -fx-text-fill: #cdd6f4;"/>
+
+                <!-- Port -->
+                <Label text="Port d'écoute"
+                       style="-fx-text-fill: #a6adc8; -fx-font-size: 11px; -fx-font-weight: bold;"/>
+                <TextField fx:id="portField" promptText="ex: 2121"
+                           style="-fx-background-color: #313244; -fx-text-fill: #cdd6f4; -fx-prompt-text-fill: #585b70;"/>
+
+                <!-- Dossier racine -->
+                <Label text="Dossier partagé"
+                       style="-fx-text-fill: #a6adc8; -fx-font-size: 11px; -fx-font-weight: bold;"/>
+                <HBox spacing="6">
+                    <TextField fx:id="rootDirField" promptText="Chemin du dossier partagé"
+                               HBox.hgrow="ALWAYS"
+                               style="-fx-background-color: #313244; -fx-text-fill: #cdd6f4; -fx-prompt-text-fill: #585b70;"/>
+                    <Button fx:id="browseButton" text="📂" onAction="#onBrowse"
+                            style="-fx-background-color: #89b4fa; -fx-text-fill: #1e1e2e;"/>
+                </HBox>
+
+                <Separator style="-fx-background-color: #45475a;" VBox.vgrow="NEVER"/>
+
+                <!-- Gestion utilisateurs -->
+                <Label text="Utilisateurs FTP"
+                       style="-fx-text-fill: #a6adc8; -fx-font-size: 11px; -fx-font-weight: bold;"/>
+
+                <TextField fx:id="usernameField" promptText="Login"
+                           style="-fx-background-color: #313244; -fx-text-fill: #cdd6f4; -fx-prompt-text-fill: #585b70;"/>
+                <PasswordField fx:id="passwordField" promptText="Mot de passe"
+                               style="-fx-background-color: #313244; -fx-text-fill: #cdd6f4; -fx-prompt-text-fill: #585b70;"/>
+
+                <HBox spacing="6">
+                    <Button fx:id="addUserButton" text="✚ Ajouter" onAction="#onAddUser"
+                            HBox.hgrow="ALWAYS" maxWidth="Infinity"
+                            style="-fx-background-color: #a6e3a1; -fx-text-fill: #1e1e2e; -fx-font-weight: bold;"/>
+                    <Button fx:id="removeUserButton" text="✖ Supprimer" onAction="#onRemoveUser"
+                            HBox.hgrow="ALWAYS" maxWidth="Infinity"
+                            style="-fx-background-color: #f38ba8; -fx-text-fill: #1e1e2e; -fx-font-weight: bold;"/>
+                </HBox>
+
+                <!-- Liste utilisateurs -->
+                <ListView fx:id="userListView" prefHeight="120"
+                          style="-fx-background-color: #313244; -fx-text-fill: #cdd6f4;"/>
+
+                <Region VBox.vgrow="ALWAYS"/>
+
+                <!-- Bouton Start/Stop -->
+                <Button fx:id="startStopButton" text="▶ Démarrer" onAction="#onStartStop"
+                        maxWidth="Infinity" prefHeight="42"
+                        style="-fx-background-color: #a6e3a1; -fx-text-fill: #1e1e2e; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 6;"/>
+            </VBox>
+
+            <!-- ── Panneau Droite : Console de logs ────────────────────── -->
+            <VBox spacing="8" HBox.hgrow="ALWAYS"
+                  style="-fx-background-color: #181825; -fx-padding: 16; -fx-background-radius: 8;">
+                <Label text="Console Serveur"
+                       style="-fx-text-fill: #a6adc8; -fx-font-size: 11px; -fx-font-weight: bold;"/>
+                <TextArea fx:id="logArea" editable="false" wrapText="true"
+                          VBox.vgrow="ALWAYS"
+                          style="-fx-background-color: #11111b; -fx-text-fill: #a6e3a1; -fx-font-family: 'Monospace'; -fx-font-size: 12px; -fx-control-inner-background: #11111b;"/>
+                <Button text="🗑 Effacer logs"
+                        onAction="#clearLogs"
+                        style="-fx-background-color: #45475a; -fx-text-fill: #cdd6f4;"/>
+            </VBox>
+
+        </HBox>
+    </center>
+</BorderPane>
