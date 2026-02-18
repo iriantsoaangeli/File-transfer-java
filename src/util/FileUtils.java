@@ -17,31 +17,31 @@ import java.util.Locale;
 /**
  * Utilitaires de gestion de fichiers pour le serveur FTP.
  * Fournit des méthodes pour :
- * - Lire/écrire le fichier d'utilisateurs
+ * - Lire/écrire le fichier d'utilisateurs (via {@link DataPaths})
  * - Formater la liste de fichiers au format Unix (LIST)
  * - Valider et résoudre les chemins dans la racine partagée
  */
 public final class FileUtils {
-
-    /** Nom du fichier de configuration des utilisateurs */
-    public static final String USERS_FILE = "users.txt";
 
     private FileUtils() { /* Utilitaire – pas d'instanciation */ }
 
     // ── Gestion des utilisateurs ─────────────────────────────────────────────
 
     /**
-     * Charge les utilisateurs depuis le fichier {@code users.txt}.
+     * Charge les utilisateurs depuis {@code data/users.txt} (via {@link DataPaths#getUsersFile()}).
      * Chaque ligne doit être au format : login:password
      * Les lignes vides ou commençant par '#' sont ignorées.
      *
-     * @return liste d'utilisateurs chargés
+     * <p>Si le fichier est absent, un utilisateur par défaut ({@code admin:test}) est créé
+     * et persisté immédiatement.</p>
+     *
+     * @return liste d'utilisateurs chargés (jamais vide)
      */
     public static List<User> loadUsers() {
         List<User> users = new ArrayList<>();
-        Path path = Paths.get(USERS_FILE);
+        Path path = DataPaths.getUsersFile();
         if (!Files.exists(path)) {
-            // Crée un utilisateur par défaut si le fichier n'existe pas
+            // Crée le dossier data/ si nécessaire et un utilisateur par défaut
             users.add(new User("admin", "test"));
             saveUsers(users);
             return users;
@@ -58,7 +58,7 @@ public final class FileUtils {
                 }
             }
         } catch (IOException e) {
-            System.err.println("[FileUtils] Impossible de lire " + USERS_FILE + " : " + e.getMessage());
+            System.err.println("[FileUtils] Impossible de lire " + path + " : " + e.getMessage());
         }
         if (users.isEmpty()) {
             users.add(new User("admin", "test"));
@@ -67,19 +67,24 @@ public final class FileUtils {
     }
 
     /**
-     * Sauvegarde la liste d'utilisateurs dans {@code users.txt}.
+     * Sauvegarde la liste d'utilisateurs dans {@code data/users.txt}.
+     * Crée le dossier {@code data/} s'il n'existe pas.
      *
      * @param users liste d'utilisateurs à sauvegarder
      */
     public static void saveUsers(List<User> users) {
-        Path path = Paths.get(USERS_FILE);
-        try (PrintWriter writer = new PrintWriter(Files.newBufferedWriter(path))) {
-            writer.println("# Fichier utilisateurs FTP - format: login:password");
-            for (User user : users) {
-                writer.println(user.serialize());
+        Path path = DataPaths.getUsersFile();
+        try {
+            // S'assurer que le dossier data/ existe
+            Files.createDirectories(path.getParent());
+            try (PrintWriter writer = new PrintWriter(Files.newBufferedWriter(path))) {
+                writer.println("# Fichier utilisateurs FTP - format: login:password");
+                for (User user : users) {
+                    writer.println(user.serialize());
+                }
             }
         } catch (IOException e) {
-            System.err.println("[FileUtils] Impossible d'écrire " + USERS_FILE + " : " + e.getMessage());
+            System.err.println("[FileUtils] Impossible d'écrire " + path + " : " + e.getMessage());
         }
     }
 

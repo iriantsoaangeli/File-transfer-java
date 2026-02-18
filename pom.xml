@@ -46,6 +46,16 @@
         <!-- ── Répertoire de build → app/target ─────────────────────────── -->
         <directory>${project.basedir}/app/target</directory>
 
+        <!-- ── Sources dans src/ (et non src/main/java) ─────────────────── -->
+        <sourceDirectory>${project.basedir}/src</sourceDirectory>
+
+        <!-- ── Ressources (FXML, CSS) dans src/resources/ ───────────────── -->
+        <resources>
+            <resource>
+                <directory>${project.basedir}/src/resources</directory>
+            </resource>
+        </resources>
+
         <plugins>
             <!-- Compiler Plugin -->
             <plugin>

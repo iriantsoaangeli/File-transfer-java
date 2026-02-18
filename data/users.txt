@@ -1,0 +1,3 @@
+# Fichier utilisateurs FTP - format: login:password
+admin:test
+angeli:123

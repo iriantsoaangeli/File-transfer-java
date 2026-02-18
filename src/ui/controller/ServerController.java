@@ -54,8 +54,8 @@ public class ServerController implements Initializable {
         interfaceComboBox.setItems(FXCollections.observableArrayList(ifaces));
         if (!ifaces.isEmpty()) interfaceComboBox.getSelectionModel().selectFirst();
 
-        // Valeur par défaut du port
-        portField.setText("2121");
+        // Valeur par défaut du port (port FTP standard)
+        portField.setText("21");
 
         // Dossier par défaut : répertoire utilisateur
         rootDirField.setText(System.getProperty("user.home"));
@@ -68,6 +68,7 @@ public class ServerController implements Initializable {
         setStatus(false);
 
         appendLog("Serveur FTP prêt. Configurez et cliquez sur 'Démarrer'.");
+        appendLog("[INFO] Port 21 est le port FTP standard (nécessite sudo sur Linux/macOS). Utilisez 2121 sans privilèges.");
     }
 
     // ── Actions FXML ──────────────────────────────────────────────────────────
@@ -200,10 +201,21 @@ public class ServerController implements Initializable {
             ftpServer.start();
             setStatus(true);
             appendLog("[UI] Serveur démarré sur " + ip + ":" + port);
+            if (port < 1024) {
+                appendLog("[INFO] Port " + port + " < 1024 : droits administrateur (sudo/root) requis sur Linux/macOS.");
+            }
         } catch (Exception e) {
+            String detail = e.getMessage();
+            String hint = "";
+            if (port < 1024) {
+                hint = "\n\n⚠ Le port " + port + " est un port privilégié (< 1024).\n"
+                     + "Sur Linux/macOS, utilisez sudo ou lancez avec des droits root.\n"
+                     + "Alternative : changez le port pour 2121 (sans privilèges).";
+            }
             showAlert(Alert.AlertType.ERROR, "Erreur démarrage",
-                    "Impossible de démarrer le serveur :\n" + e.getMessage());
-            appendLog("[ERREUR] " + e.getMessage());
+                    "Impossible de démarrer le serveur :\n" + detail + hint);
+            appendLog("[ERREUR] " + detail);
+            if (!hint.isEmpty()) appendLog("[INFO] Port < 1024 : droits administrateur requis. Essayez le port 2121.");
         }
     }
 
